@@ -2,13 +2,19 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var userSchema = new Schema({
-  username: { type: String, unique: true },
+  username: { type: String, unique: true, validate:[validateUsername, "Usernames must not contain non-alphanumeric characters"]},
   publicKey: {type: String, unique: true },
   configuration: {
     trustedKeys: [String],
     signature: String
   }
 });
+
+function validateUsername(username) {
+  //Check characters submitted against an alphanumeric whitelist to prevent unicode craziness
+  var alphaNumericWhitelist = /^[\060-\071\101-\132\141-\172]*$/;
+  return alphaNumericWhitelist.test(username);
+}
 
 userSchema.statics.create = function createUser(userData, callback) {
   new this({
